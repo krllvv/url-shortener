@@ -3,7 +3,9 @@ package handler
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"io"
 	"net/http"
+	"strings"
 	"url-shortener/internal/entity"
 	"url-shortener/internal/service"
 )
@@ -23,11 +25,13 @@ func (h *Handler) InitRoutes(router *gin.Engine) {
 
 func (h *Handler) ShortenURL(c *gin.Context) {
 	var input entity.URL
-	if err := c.ShouldBindJSON(&input.Url); err != nil {
+	str, err := io.ReadAll(c.Request.Body)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
+	url := strings.TrimSpace(string(str))
+	input.Url = url
 	alias, err := h.service.SaveURL(input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
