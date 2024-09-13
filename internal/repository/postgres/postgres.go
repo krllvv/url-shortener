@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
+	"log"
 	"os"
 	"strconv"
+	"time"
 	"url-shortener/config"
 	"url-shortener/internal/entity"
 	"url-shortener/pkg/utils"
@@ -23,7 +25,19 @@ func NewPostgresRepository(db *sql.DB) *PostgresRepository {
 func NewPostgresDB(cfg *config.Config) (*sql.DB, error) {
 	connStr := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
 		cfg.DbUser, cfg.DbPassword, cfg.DbHost, cfg.DbPort, cfg.DbName)
-	db, err := sql.Open("postgres", connStr)
+	var db *sql.DB
+	var err error
+	maxAttempts := 5
+	for att := 0; att < maxAttempts; att++ {
+		db, err = sql.Open("postgres", connStr)
+		err = db.Ping()
+		if err == nil {
+			break
+		}
+		log.Printf("Failed connecting to database (attempt %v/%v), retrying in 5 seconds...\n", att+1, maxAttempts)
+		time.Sleep(5 * time.Second)
+	}
+
 	if err != nil {
 		return nil, errors.New("error connecting to database")
 	}
