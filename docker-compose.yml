@@ -3,24 +3,20 @@ services:
   app:
     image: url-shortener
     build: .
-    env_file:
-      - .env.example
     environment:
       PG_USER: postgres
       PG_PASSWORD: password
       PG_DATABASE: postgres
       PG_HOST: db
       PG_PORT: 5432
-      URL_LENGTH: ${URL_LENGTH}
+      URL_LENGTH: 5
     ports:
-      - 8080:8080
+      - "8080:8080"
     depends_on:
       - db
   db:
     restart: always
     image: postgres:latest
-    env_file:
-      - .env.example
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -28,7 +24,6 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:
-      - 5432:5432
-
+      - "5432:5432"
 volumes:
   pg_data:

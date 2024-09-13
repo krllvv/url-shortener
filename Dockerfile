@@ -12,6 +12,6 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /app/url-shortener /app/
-COPY .env.example .env
+COPY --from=builder /app/.env.example /app/.env
 
 CMD ["./url-shortener", "-d"]
